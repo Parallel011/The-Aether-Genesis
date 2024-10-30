@@ -12,6 +12,7 @@ import com.aetherteam.genesis.entity.GenesisEntityTypes;
 import com.aetherteam.genesis.entity.projectile.HostEyeProjectile;
 import com.aetherteam.nitrogen.entity.BossRoomTracker;
 import com.aetherteam.nitrogen.network.PacketRelay;
+import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
@@ -113,10 +114,10 @@ public class SliderHostMimic extends PathfinderMob implements AetherBossMob<Slid
     }
 
     public void sendEye() {
-        while (this.eyes.size() > 4) (this.eyes.remove(0)).setHealth(0);
-        HostEyeProjectile eye = new HostEyeProjectile(GenesisEntityTypes.HOST_EYE.get(), level());
+        while (this.eyes.size() > 4) (this.eyes.remove(0)).discard();
+        HostEyeProjectile eye = new HostEyeProjectile(this.level(), this);
         this.level().addFreshEntity(eye);
-        eye.setPos(this.position());
+        eye.setPos(this.position().add(0.0F, (this.getBbHeight() / 2.0F) + 0.2F, 0.0F));
         this.level().playSound(this, this.blockPosition(), AetherSoundEvents.ENTITY_SLIDER_AWAKEN.get(), SoundSource.HOSTILE, 2.5F, 1.0F / (this.random.nextFloat() * 0.2F + 0.9F));
         this.eyes.add(eye);
         this.sendDelay = 30;
