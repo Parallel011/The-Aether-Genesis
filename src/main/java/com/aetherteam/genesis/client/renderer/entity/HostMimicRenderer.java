@@ -2,7 +2,7 @@ package com.aetherteam.genesis.client.renderer.entity;
 
 import com.aetherteam.genesis.AetherGenesis;
 import com.aetherteam.genesis.client.renderer.GenesisModelLayers;
-import com.aetherteam.genesis.client.renderer.entity.layers.HostMimicLayer;
+import com.aetherteam.genesis.client.renderer.entity.layers.HostMimicGlowLayer;
 import com.aetherteam.genesis.client.renderer.entity.model.SliderHostMimicModel;
 import com.aetherteam.genesis.entity.monster.dungeon.boss.SliderHostMimic;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
@@ -15,7 +15,7 @@ public class HostMimicRenderer extends MobRenderer<SliderHostMimic, SliderHostMi
 
     public HostMimicRenderer(EntityRendererProvider.Context context) {
         super(context, new SliderHostMimicModel(context.bakeLayer(GenesisModelLayers.SLIDER_HOST_MIMIC)), 0.5F);
-        this.addLayer(new HostMimicLayer(this));
+        this.addLayer(new HostMimicGlowLayer(this));
     }
 
     @Override
