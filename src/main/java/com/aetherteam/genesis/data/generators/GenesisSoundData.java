@@ -1,5 +1,6 @@
 package com.aetherteam.genesis.data.generators;
 
+import com.aetherteam.aether.client.AetherSoundEvents;
 import com.aetherteam.genesis.AetherGenesis;
 import com.aetherteam.genesis.client.GenesisSoundEvents;
 import net.minecraft.data.PackOutput;
@@ -115,6 +116,19 @@ public class GenesisSoundData extends SoundDefinitionsProvider {
         this.add(GenesisSoundEvents.ENTITY_TRACKING_GOLEM_SEEN_ENEMY,
                 definition().with(sound("aether_genesis:entity/tracking_golem/seen_enemy"))
                         .subtitle("subtitles.aether_genesis.entity.tracking_golem.seen_enemy")
+        );
+
+        this.add(GenesisSoundEvents.ENTITY_SLIDER_HOST_MIMIC_AWAKEN,
+                definition().with(sound("aether:entity/slider/awaken"))
+                        .subtitle("subtitles.aether_genesis.entity.slider_host_mimic.awaken")
+        );
+        this.add(GenesisSoundEvents.ENTITY_SLIDER_HOST_MIMIC_SHOOT,
+                definition().with(sound("aether:entity/slider/awaken"))
+                        .subtitle("subtitles.aether_genesis.entity.slider_host_mimic.shoot")
+        );
+        this.add(GenesisSoundEvents.ENTITY_SLIDER_HOST_MIMIC_SCARE,
+                definition().with(sound("aether_genesis:entity/tracking_golem/creepy_seen"))
+                        .subtitle("subtitles.aether_genesis.entity.slider_host_mimic.scare")
         );
 
         this.add(GenesisSoundEvents.ENTITY_SENTRY_GUARDIAN_DEATH,

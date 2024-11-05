@@ -2,6 +2,7 @@ package com.aetherteam.genesis.entity.projectile;
 
 import com.aetherteam.aether.client.AetherSoundEvents;
 import com.aetherteam.genesis.entity.GenesisEntityTypes;
+import com.aetherteam.genesis.entity.monster.dungeon.boss.SliderHostMimic;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
@@ -15,18 +16,18 @@ import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.neoforge.event.EventHooks;
 import org.joml.Vector3f;
 
 import javax.annotation.Nullable;
 
 public class HostEyeProjectile extends Projectile {
     private static final EntityDataAccessor<Vector3f> ID_MOTION = SynchedEntityData.defineId(HostEyeProjectile.class, EntityDataSerializers.VECTOR3);
-    private Mob projectileOwner;
+    private SliderHostMimic projectileOwner;
     private Vec3 targetPoint;
     private float velocity;
     private Direction moveDirection = null;
@@ -37,9 +38,10 @@ public class HostEyeProjectile extends Projectile {
         this.setNoGravity(true);
     }
 
-    public HostEyeProjectile(Level level, Mob owner) {
+    public HostEyeProjectile(Level level, SliderHostMimic owner, Direction moveDirection) {
         this(GenesisEntityTypes.HOST_EYE.get(), level);
         this.projectileOwner = owner;
+        this.moveDirection = moveDirection;
         this.setOwner(owner);
     }
 
@@ -70,15 +72,18 @@ public class HostEyeProjectile extends Projectile {
                 --this.moveDelay;
             }
             if (this.moveDirection == null) {
-                this.setMotionVector(this.getMotionVector().mul(new Vector3f(0, 0.05F, 0)));
-            }
-            HitResult hitresult = ProjectileUtil.getHitResultOnMoveVector(this, this::canHitEntity);
-            if (hitresult.getType() != HitResult.Type.MISS && !net.neoforged.neoforge.event.EventHooks.onProjectileImpact(this, hitresult)) {
-                this.onHit(hitresult);
+                this.setMotionVector(this.getMotionVector().mul(new Vector3f(0, 0, 0)));
             }
         }
+        this.setDeltaMovement(new Vec3(this.getMotionVector().x(), this.getMotionVector().y(), this.getMotionVector().z()));
+
+        HitResult hitresult = ProjectileUtil.getHitResultOnMoveVector(this, this::canHitEntity);
+        if (hitresult.getType() != HitResult.Type.MISS && !EventHooks.onProjectileImpact(this, hitresult)) {
+            this.onHit(hitresult); //todo entity collision is a bit inconsistent
+        }
+
         this.checkInsideBlocks();
-        this.move(MoverType.SELF, new Vec3(this.getMotionVector().x(), this.getMotionVector().y(), this.getMotionVector().z()));
+        this.move(MoverType.SELF, this.getDeltaMovement()); //todo not properly working with wall collision
     }
 
     @Nullable
@@ -142,7 +147,13 @@ public class HostEyeProjectile extends Projectile {
 
     @Override
     public void checkDespawn() {
-        if (this.level().getDifficulty() == Difficulty.PEACEFUL) {
+        if (this.level().getDifficulty() == Difficulty.PEACEFUL
+                || this.projectileOwner == null
+                || !this.projectileOwner.isAlive()
+                || !this.projectileOwner.isAwake()) {
+            if (this.projectileOwner != null) {
+                this.projectileOwner.getEyeProjectiles().removeIf((projectile) -> projectile.getId() == this.getId());
+            }
             this.discard();
         }
     }
@@ -157,9 +168,9 @@ public class HostEyeProjectile extends Projectile {
         super.onHitEntity(result);
         Entity entity = result.getEntity();
         Mob owner = this.projectileOwner;
-        if (entity.hurt(this.damageSources().mobAttack(owner), 4)) { //todo
+        if (entity instanceof LivingEntity target && target.hurt(this.damageSources().mobAttack(owner), 4)) {
             this.playSound(AetherSoundEvents.ENTITY_SLIDER_COLLIDE.get(), 1.0F, (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
-            this.doEnchantDamageEffects(owner, entity);
+            target.knockback(0.5, this.getX() - target.getX(), this.getZ() - target.getZ());
         }
     }
 
@@ -178,15 +189,7 @@ public class HostEyeProjectile extends Projectile {
 
     @Override
     public boolean hurt(DamageSource pSource, float pAmount) {
-        if (!this.level().isClientSide()) {
-            this.destroy(); //todo
-        }
-        return true;
-    }
-
-    private void destroy() {
-        this.discard();
-        this.level().gameEvent(GameEvent.ENTITY_DAMAGE, this.position(), GameEvent.Context.of(this));
+        return false;
     }
 
     public Vector3f getMotionVector() {
@@ -250,7 +253,7 @@ public class HostEyeProjectile extends Projectile {
         }
         this.setMotionVector(new Vector3f(x, y, z));
         if (tag.contains("ProjectileOwner")) {
-            if (this.level().getEntity(tag.getInt("ProjectileOwner")) instanceof Mob mob) {
+            if (this.level().getEntity(tag.getInt("ProjectileOwner")) instanceof SliderHostMimic mob) {
                 this.projectileOwner = mob;
             }
         }

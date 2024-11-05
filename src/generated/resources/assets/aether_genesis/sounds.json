@@ -79,6 +79,24 @@
     ],
     "subtitle": "subtitles.aether_genesis.entity.sentry_guardian.spawn"
   },
+  "entity.slider_host_mimic.awaken": {
+    "sounds": [
+      "aether:entity/slider/awaken"
+    ],
+    "subtitle": "subtitles.aether_genesis.entity.slider_host_mimic.awaken"
+  },
+  "entity.slider_host_mimic.scare": {
+    "sounds": [
+      "aether_genesis:entity/tracking_golem/creepy_seen"
+    ],
+    "subtitle": "subtitles.aether_genesis.entity.slider_host_mimic.scare"
+  },
+  "entity.slider_host_mimic.shoot": {
+    "sounds": [
+      "aether:entity/slider/awaken"
+    ],
+    "subtitle": "subtitles.aether_genesis.entity.slider_host_mimic.shoot"
+  },
   "entity.tempest.ambient": {
     "sounds": [
       "aether:entity/zephyr/call"

@@ -121,7 +121,7 @@ public class GenesisEntityTypes {
         event.put(GenesisEntityTypes.TRACKING_GOLEM.get(), TrackingGolem.createMobAttributes().build());
         event.put(GenesisEntityTypes.SKYROOT_MIMIC.get(), Mimic.createMobAttributes().build());
         event.put(GenesisEntityTypes.SENTRY_GUARDIAN.get(), SentryGuardian.createMobAttributes().build());
-        event.put(GenesisEntityTypes.SLIDER_HOST_MIMIC.get(), SliderHostMimic.createHostAttributes().build());
+        event.put(GenesisEntityTypes.SLIDER_HOST_MIMIC.get(), SliderHostMimic.createMobAttributes().build());
         event.put(GenesisEntityTypes.LABYRINTH_EYE.get(), LabyrinthEye.createMobAttributes().build());
         event.put(GenesisEntityTypes.FANGRIN.get(), Fangrin.createAttributes().build());
         event.put(GenesisEntityTypes.KRAISITH.get(), Kraisith.createAttributes().build());
