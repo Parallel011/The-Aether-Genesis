@@ -1,6 +1,6 @@
 package com.aetherteam.genesis.entity.projectile;
 
-import com.aetherteam.aether.client.AetherSoundEvents;
+import com.aetherteam.genesis.client.GenesisSoundEvents;
 import com.aetherteam.genesis.entity.GenesisEntityTypes;
 import com.aetherteam.genesis.entity.monster.dungeon.boss.SliderHostMimic;
 import net.minecraft.core.Direction;
@@ -89,7 +89,7 @@ public class HostEyeProjectile extends Projectile {
             for (Entity target : entities) {
                 Mob owner = this.projectileOwner;
                 if (target instanceof LivingEntity living && living.hurt(this.damageSources().mobAttack(owner), 4)) {
-                    this.playSound(AetherSoundEvents.ENTITY_SLIDER_COLLIDE.get(), 1.0F, (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
+                    this.playSound(GenesisSoundEvents.ENTITY_HOST_EYE_COLLIDE.get(), 1.0F, (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
                     living.knockback(1.0, this.getX() - living.getX(), this.getZ() - living.getZ());
                 }
             }

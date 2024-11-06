@@ -4,7 +4,6 @@ import com.aetherteam.aether.Aether;
 import com.aetherteam.aether.AetherConfig;
 import com.aetherteam.aether.AetherTags;
 import com.aetherteam.aether.block.AetherBlocks;
-import com.aetherteam.aether.client.AetherSoundEvents;
 import com.aetherteam.aether.entity.AetherBossMob;
 import com.aetherteam.aether.entity.ai.goal.MostDamageTargetGoal;
 import com.aetherteam.aether.entity.monster.dungeon.boss.BossNameGenerator;
@@ -462,17 +461,17 @@ public class SliderHostMimic extends PathfinderMob implements AetherBossMob<Slid
     @Nullable
     @Override
     protected SoundEvent getAmbientSound() {
-        return this.isAwake() ? (random.nextInt(5) == 0 ? GenesisSoundEvents.ENTITY_SLIDER_HOST_MIMIC_SCARE.get() : null) : AetherSoundEvents.ENTITY_SLIDER_AMBIENT.get();
+        return this.isAwake() ? (random.nextInt(5) == 0 ? GenesisSoundEvents.ENTITY_SLIDER_HOST_MIMIC_SCARE.get() : null) : GenesisSoundEvents.ENTITY_SLIDER_HOST_MIMIC_AMBIENT.get();
     }
 
     @Override
     protected SoundEvent getHurtSound(DamageSource damageSource) {
-        return AetherSoundEvents.ENTITY_SLIDER_HURT.get();
+        return GenesisSoundEvents.ENTITY_SLIDER_HOST_MIMIC_HURT.get();
     }
 
     @Override
     protected SoundEvent getDeathSound() {
-        return AetherSoundEvents.ENTITY_SLIDER_DEATH.get();
+        return GenesisSoundEvents.ENTITY_SLIDER_HOST_MIMIC_DEATH.get();
     }
     
     @Override
