@@ -38,7 +38,6 @@ public class GenesisSoundEvents {
     public static final DeferredHolder<SoundEvent, SoundEvent> ENTITY_SLIDER_HOST_MIMIC_SCARE = register("entity.slider_host_mimic.scare");
     public static final DeferredHolder<SoundEvent, SoundEvent> ENTITY_SLIDER_HOST_MIMIC_HURT = register("entity.slider_host_mimic.hurt");
     public static final DeferredHolder<SoundEvent, SoundEvent> ENTITY_SLIDER_HOST_MIMIC_DEATH = register("entity.slider_host_mimic.death");
-    //todo sounds
 
     public static final DeferredHolder<SoundEvent, SoundEvent> ENTITY_SENTRY_GUARDIAN_DEATH = register("entity.sentry_guardian.death");
     public static final DeferredHolder<SoundEvent, SoundEvent> ENTITY_SENTRY_GUARDIAN_SUMMON = register("entity.sentry_guardian.summon");
