@@ -6,9 +6,6 @@ import com.aetherteam.genesis.entity.monster.dungeon.boss.SliderHostMimic;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
-import net.minecraft.network.syncher.EntityDataAccessor;
-import net.minecraft.network.syncher.EntityDataSerializers;
-import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.damagesource.DamageSource;
@@ -17,21 +14,24 @@ import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.event.EventHooks;
-import org.joml.Vector3f;
 
 import javax.annotation.Nullable;
+import java.util.List;
 
 public class HostEyeProjectile extends Projectile {
-    private static final EntityDataAccessor<Vector3f> ID_MOTION = SynchedEntityData.defineId(HostEyeProjectile.class, EntityDataSerializers.VECTOR3);
     private SliderHostMimic projectileOwner;
     private Vec3 targetPoint;
     private float velocity;
     private Direction moveDirection = null;
     private int moveDelay = this.calculateMoveDelay();
+    private int lerpSteps;
+    private double lerpX;
+    private double lerpY;
+    private double lerpZ;
+    private Vec3 targetDeltaMovement = Vec3.ZERO;
 
     public HostEyeProjectile(EntityType<? extends HostEyeProjectile> entityType, Level level) {
         super(entityType, level);
@@ -46,14 +46,19 @@ public class HostEyeProjectile extends Projectile {
     }
 
     @Override
-    protected void defineSynchedData() {
-        this.entityData.define(ID_MOTION, new Vector3f(0, 0, 0));
-    }
+    protected void defineSynchedData() { }
 
     @Override
     public void tick() {
         super.tick();
-        if (!this.level().isClientSide()) {
+        if (this.level().isClientSide()) {
+            if (this.lerpSteps > 0) {
+                this.lerpPositionAndRotationStep(this.lerpSteps, this.lerpX, this.lerpY, this.lerpZ, 0.0, 0.0);
+                --this.lerpSteps;
+            } else {
+                this.reapplyPosition();
+            }
+        } else {
             if (this.moveDelay <= 0) {
                 this.targetPoint = this.findTargetPoint();
                 if (this.targetPoint != null) {
@@ -62,7 +67,7 @@ public class HostEyeProjectile extends Projectile {
                         if (this.velocity < this.getMaxVelocity()) {
                             this.velocity = Math.min(this.getMaxVelocity(), this.velocity + this.getVelocityIncrease());
                         }
-                        this.setMotionVector(new Vector3f((float) moveDir.getStepX() * this.velocity, (float) moveDir.getStepY() * this.velocity, (float) moveDir.getStepZ() * this.velocity));
+                        this.setDeltaMovement((float) moveDir.getStepX() * this.velocity, (float) moveDir.getStepY() * this.velocity, (float) moveDir.getStepZ() * this.velocity);
                         this.hasImpulse = true;
                     } else {
                         this.stop();
@@ -72,18 +77,26 @@ public class HostEyeProjectile extends Projectile {
                 --this.moveDelay;
             }
             if (this.moveDirection == null) {
-                this.setMotionVector(this.getMotionVector().mul(new Vector3f(0, 0, 0)));
+                this.setDeltaMovement(this.getDeltaMovement().multiply(0, 0, 0));
             }
-        }
-        this.setDeltaMovement(new Vec3(this.getMotionVector().x(), this.getMotionVector().y(), this.getMotionVector().z()));
 
-        HitResult hitresult = ProjectileUtil.getHitResultOnMoveVector(this, this::canHitEntity);
-        if (hitresult.getType() != HitResult.Type.MISS && !EventHooks.onProjectileImpact(this, hitresult)) {
-            this.onHit(hitresult); //todo entity collision is a bit inconsistent
-        }
+            HitResult hitresult = ProjectileUtil.getHitResultOnMoveVector(this, this::canHitEntity);
+            if (hitresult.getType() != HitResult.Type.MISS && !EventHooks.onProjectileImpact(this, hitresult)) {
+                this.onHit(hitresult);
+            }
 
-        this.checkInsideBlocks();
-        this.move(MoverType.SELF, this.getDeltaMovement()); //todo not properly working with wall collision
+            List<Entity> entities = this.level().getEntities(this, this.getBoundingBox());
+            for (Entity target : entities) {
+                Mob owner = this.projectileOwner;
+                if (target instanceof LivingEntity living && living.hurt(this.damageSources().mobAttack(owner), 4)) {
+                    this.playSound(AetherSoundEvents.ENTITY_SLIDER_COLLIDE.get(), 1.0F, (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
+                    living.knockback(1.0, this.getX() - living.getX(), this.getZ() - living.getZ());
+                }
+            }
+
+            this.checkInsideBlocks();
+            this.move(MoverType.SELF, this.getDeltaMovement());
+        }
     }
 
     @Nullable
@@ -94,7 +107,7 @@ public class HostEyeProjectile extends Projectile {
         } else {
             if (this.projectileOwner != null) {
                 LivingEntity target = this.projectileOwner.getTarget();
-                return target == null ? null : target.position();
+                return target == null ? null : target.getEyePosition();
             }
             return null;
         }
@@ -104,7 +117,7 @@ public class HostEyeProjectile extends Projectile {
         Direction moveDir = this.moveDirection;
         if (moveDir == null) {
             double x = targetPoint.x - this.getX();
-            double y = targetPoint.y - this.getY();
+            double y = targetPoint.y - this.getBoundingBox().minY;
             double z = targetPoint.z - this.getZ();
             moveDir = this.calculateDirection(x, y, z);
             this.moveDirection = moveDir;
@@ -146,6 +159,36 @@ public class HostEyeProjectile extends Projectile {
     }
 
     @Override
+    public void lerpTo(double x, double y, double z, float yRot, float xRot, int steps) {
+        this.lerpX = x;
+        this.lerpY = y;
+        this.lerpZ = z;
+        this.lerpSteps = steps + 2;
+        this.setDeltaMovement(this.targetDeltaMovement);
+    }
+
+    @Override
+    public double lerpTargetX() {
+        return this.lerpSteps > 0 ? this.lerpX : this.getX();
+    }
+
+    @Override
+    public double lerpTargetY() {
+        return this.lerpSteps > 0 ? this.lerpY : this.getY();
+    }
+
+    @Override
+    public double lerpTargetZ() {
+        return this.lerpSteps > 0 ? this.lerpZ : this.getZ();
+    }
+
+    @Override
+    public void lerpMotion(double x, double y, double z) {
+        this.targetDeltaMovement = new Vec3(x, y, z);
+        this.setDeltaMovement(this.targetDeltaMovement);
+    }
+
+    @Override
     public void checkDespawn() {
         if (this.level().getDifficulty() == Difficulty.PEACEFUL
                 || this.projectileOwner == null
@@ -164,17 +207,6 @@ public class HostEyeProjectile extends Projectile {
     }
 
     @Override
-    protected void onHitEntity(EntityHitResult result) {
-        super.onHitEntity(result);
-        Entity entity = result.getEntity();
-        Mob owner = this.projectileOwner;
-        if (entity instanceof LivingEntity target && target.hurt(this.damageSources().mobAttack(owner), 4)) {
-            this.playSound(AetherSoundEvents.ENTITY_SLIDER_COLLIDE.get(), 1.0F, (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
-            target.knockback(0.5, this.getX() - target.getX(), this.getZ() - target.getZ());
-        }
-    }
-
-    @Override
     protected void onHitBlock(BlockHitResult pResult) {
         super.onHitBlock(pResult);
         this.stop();
@@ -188,16 +220,8 @@ public class HostEyeProjectile extends Projectile {
     }
 
     @Override
-    public boolean hurt(DamageSource pSource, float pAmount) {
+    public boolean hurt(DamageSource source, float amount) {
         return false;
-    }
-
-    public Vector3f getMotionVector() {
-        return this.entityData.get(ID_MOTION);
-    }
-
-    public void setMotionVector(Vector3f vector) {
-        this.entityData.set(ID_MOTION, vector);
     }
 
     @Override
@@ -218,9 +242,6 @@ public class HostEyeProjectile extends Projectile {
     @Override
     protected void addAdditionalSaveData(CompoundTag tag) {
         super.addAdditionalSaveData(tag);
-        tag.putFloat("xMotion", this.getMotionVector().x());
-        tag.putFloat("yMotion", this.getMotionVector().y());
-        tag.putFloat("zMotion", this.getMotionVector().z());
         if (this.projectileOwner != null) {
             tag.putInt("ProjectileOwner", this.projectileOwner.getId());
         }
@@ -239,19 +260,6 @@ public class HostEyeProjectile extends Projectile {
     @Override
     protected void readAdditionalSaveData(CompoundTag tag) {
         super.readAdditionalSaveData(tag);
-        float x = 0.0F;
-        float y = 0.0F;
-        float z = 0.0F;
-        if (tag.contains("xMotion")) {
-            x = tag.getFloat("xMotion");
-        }
-        if (tag.contains("yMotion")) {
-            y = tag.getFloat("yMotion");
-        }
-        if (tag.contains("zMotion")) {
-            z = tag.getFloat("zMotion");
-        }
-        this.setMotionVector(new Vector3f(x, y, z));
         if (tag.contains("ProjectileOwner")) {
             if (this.level().getEntity(tag.getInt("ProjectileOwner")) instanceof SliderHostMimic mob) {
                 this.projectileOwner = mob;
