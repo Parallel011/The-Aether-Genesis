@@ -155,7 +155,7 @@ public class HostEyeProjectile extends Projectile {
     }
 
     public float getMaxVelocity() {
-        return 2.5F;
+        return 5.0F;
     }
 
     @Override

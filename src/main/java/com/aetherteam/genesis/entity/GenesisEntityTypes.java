@@ -50,7 +50,7 @@ public class GenesisEntityTypes {
     public static final  DeferredHolder<EntityType<?>, EntityType<SentryGuardian>> SENTRY_GUARDIAN = ENTITY_TYPES.register("sentry_guardian",
             () -> EntityType.Builder.of(SentryGuardian::new, MobCategory.MONSTER).sized(2.25F, 2.5F).fireImmune().clientTrackingRange(10).build("sentry_guardian"));
     public static final  DeferredHolder<EntityType<?>, EntityType<SliderHostMimic>> SLIDER_HOST_MIMIC = ENTITY_TYPES.register("slider_host_mimic",
-            () -> EntityType.Builder.of(SliderHostMimic::new, MobCategory.MONSTER).sized(2, 2.5F).clientTrackingRange(10).build("slider_host_mimic"));
+            () -> EntityType.Builder.of(SliderHostMimic::new, MobCategory.MONSTER).sized(2.1F, 2.5F).clientTrackingRange(10).build("slider_host_mimic"));
     public static final  DeferredHolder<EntityType<?>, EntityType<LabyrinthEye>> LABYRINTH_EYE = ENTITY_TYPES.register("labyrinth_eye",
             () -> EntityType.Builder.of(LabyrinthEye::new, MobCategory.MONSTER).sized(2, 2).clientTrackingRange(8).build("labyrinth_eye"));
 

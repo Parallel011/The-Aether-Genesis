@@ -80,6 +80,7 @@ public class SliderHostMimic extends PathfinderMob implements AetherBossMob<Slid
     private BossRoomTracker<SliderHostMimic> bronzeDungeon;
     private final List<HostEyeProjectile> eyeProjectiles = new ArrayList<>();
 
+    private int spawnEyeCooldown;
     private int chatCooldown;
 
     public SliderHostMimic(EntityType<? extends SliderHostMimic> entityType, Level level) {
@@ -110,7 +111,8 @@ public class SliderHostMimic extends PathfinderMob implements AetherBossMob<Slid
     protected void registerGoals() {
         this.goalSelector.addGoal(0, new SliderHostMimic.ShootHostEyeGoal(this));
         this.goalSelector.addGoal(1, new SliderHostMimic.HostAvoidPlayerGoal(this));
-        this.goalSelector.addGoal(2, new SliderHostMimic.InactiveGoal(this));
+        this.goalSelector.addGoal(2, new SliderHostMimic.HostRandomMovementGoal(this));
+        this.goalSelector.addGoal(3, new SliderHostMimic.InactiveGoal(this));
 
         this.mostDamageTargetGoal = new MostDamageTargetGoal(this);
         this.targetSelector.addGoal(1, this.mostDamageTargetGoal);
@@ -134,6 +136,9 @@ public class SliderHostMimic extends PathfinderMob implements AetherBossMob<Slid
         if (this.getChatCooldown() > 0) {
             this.chatCooldown--;
         }
+        if (this.spawnEyeCooldown > 0) {
+            this.spawnEyeCooldown--;
+        }
     }
 
     private void evaporate() {
@@ -155,6 +160,10 @@ public class SliderHostMimic extends PathfinderMob implements AetherBossMob<Slid
             super.hurt(source, amount);
             if (!this.level().isClientSide() && source.getEntity() instanceof LivingEntity living) {
                 this.mostDamageTargetGoal.addAggro(living, amount); // AI goal for being hurt.
+                if (this.spawnEyeCooldown <= 0 && this.getEyeProjectiles().size() == 4) {
+                    this.getEyeProjectiles().remove(0).discard();
+                    this.spawnEyeCooldown = 200;
+                }
             }
         } else if (damageResult.isPresent()) {
             if (super.hurt(source, amount) && this.getHealth() > 0) {
@@ -163,6 +172,10 @@ public class SliderHostMimic extends PathfinderMob implements AetherBossMob<Slid
                 }
                 if (!this.level().isClientSide() && source.getEntity() instanceof LivingEntity living) {
                     this.mostDamageTargetGoal.addAggro(living, amount); // AI goal for being hurt.
+                    if (this.spawnEyeCooldown <= 0 && this.getEyeProjectiles().size() == 4) {
+                        this.getEyeProjectiles().remove(0).discard();
+                        this.spawnEyeCooldown = 200;
+                    }
                 }
                 return true;
             }
@@ -553,7 +566,6 @@ public class SliderHostMimic extends PathfinderMob implements AetherBossMob<Slid
 
     public static class HostAvoidPlayerGoal extends Goal {
         private final SliderHostMimic sliderHostMimic;
-        private Entity avoidEntity;
         protected double posX;
         protected double posY;
         protected double posZ;
@@ -567,22 +579,127 @@ public class SliderHostMimic extends PathfinderMob implements AetherBossMob<Slid
         @Override
         public boolean canUse() {
             if (this.sliderHostMimic.isAwake()) {
-                if (this.sliderHostMimic.getLastHurtByMob() != null && this.avoidEntity == null) {
-                    return this.findRandomPosition();
+                if (this.sliderHostMimic.getDungeon() != null) {
+                    for (UUID id : this.sliderHostMimic.getDungeon().dungeonPlayers()) {
+                        Player player = this.sliderHostMimic.level().getPlayerByUUID(id);
+                        if (player != null && player.distanceToSqr(this.sliderHostMimic) < 81) {
+                            Vec3 vec3 = this.findRandomPosition(player);
+                            if (vec3 != null) {
+                                if (player.distanceToSqr(vec3.x, vec3.y, vec3.z) < player.distanceToSqr(this.sliderHostMimic)) {
+                                    return false;
+                                } else {
+                                    this.posX = vec3.x;
+                                    this.posY = vec3.y;
+                                    this.posZ = vec3.z;
+                                    return true;
+                                }
+                            }
+                        }
+                    }
                 }
             }
             return false;
         }
 
-        protected boolean findRandomPosition() {
-            Vec3 vec3 = DefaultRandomPos.getPos(this.sliderHostMimic, 16, 1);
+        protected Vec3 findRandomPosition(LivingEntity entity) {
+            Vec3 vec3 = DefaultRandomPos.getPosAway(this.sliderHostMimic, 16, 2, entity.position());
             if (vec3 == null || (this.sliderHostMimic.getDungeon() != null && !this.sliderHostMimic.getDungeon().roomBounds().contains(vec3))) {
-                return false;
+                return null;
+            }
+            return vec3;
+        }
+
+        @Override
+        public boolean canContinueToUse() {
+            return !this.sliderHostMimic.getBoundingBox().contains(new Vec3(this.posX, this.posY, this.posZ))
+                    && this.sliderHostMimic.isAwake()
+                    && !this.sliderHostMimic.getNavigation().isDone()
+                    && !this.sliderHostMimic.getNavigation().isStuck()
+                    && this.sliderHostMimic.getTarget() != null;
+        }
+
+        @Override
+        public void start() {
+            this.sliderHostMimic.playSound(this.sliderHostMimic.getScareSound(), 2.5F, 1.0F / (this.sliderHostMimic.getRandom().nextFloat() * 0.2F + 0.9F));
+            this.sliderHostMimic.getNavigation().moveTo(this.posX, this.posY, this.posZ, 1.5);
+        }
+
+        @Override
+        public void stop() {
+            this.sliderHostMimic.getNavigation().stop();
+        }
+
+        @Override
+        public void tick() {
+            super.tick();
+            LivingEntity avoid = null;
+            if (this.sliderHostMimic.getDungeon() != null) {
+                for (UUID id : this.sliderHostMimic.getDungeon().dungeonPlayers()) {
+                    Player player = this.sliderHostMimic.level().getPlayerByUUID(id);
+                    if (player != null && player.distanceToSqr(this.sliderHostMimic) < 81) {
+                        avoid = player;
+                    }
+                }
+            } else if (this.sliderHostMimic.getTarget() != null && this.sliderHostMimic.getTarget().distanceToSqr(this.sliderHostMimic) < 81) {
+                avoid = this.sliderHostMimic.getTarget();
+            }
+            if (avoid != null) {
+                Vec3 vec3 = this.findRandomPosition(avoid);
+                if (vec3 != null) {
+                    if (!(avoid.distanceToSqr(vec3.x, vec3.y, vec3.z) < avoid.distanceToSqr(this.sliderHostMimic))) {
+                        this.posX = vec3.x;
+                        this.posY = vec3.y;
+                        this.posZ = vec3.z;
+                        this.sliderHostMimic.getNavigation().moveTo(this.posX, this.posY, this.posZ, 1.5);
+                    }
+                }
+            }
+        }
+
+        @Override
+        public boolean requiresUpdateEveryTick() {
+            return true;
+        }
+    }
+
+    public static class HostRandomMovementGoal extends Goal {
+        private final SliderHostMimic sliderHostMimic;
+        protected double posX;
+        protected double posY;
+        protected double posZ;
+
+        public HostRandomMovementGoal(SliderHostMimic sliderHostMimic) {
+            super();
+            this.sliderHostMimic = sliderHostMimic;
+            this.setFlags(EnumSet.of(Goal.Flag.MOVE));
+        }
+
+        @Override
+        public boolean canUse() {
+            if (this.sliderHostMimic.isAwake()) {
+                if (this.sliderHostMimic.getDeltaMovement().x() == 0 && this.sliderHostMimic.getDeltaMovement().z() == 0) {
+                    Vec3 vec3 = this.findRandomPosition();
+                    if (vec3 != null) {
+                        this.posX = vec3.x;
+                        this.posY = vec3.y;
+                        this.posZ = vec3.z;
+                    }
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        protected Vec3 findRandomPosition() {
+            if (this.sliderHostMimic.getDungeon() != null) {
+                List<Vec3> positions = BlockPos.betweenClosedStream(this.sliderHostMimic.getDungeon().roomBounds()).map((pos) -> Vec3.atLowerCornerOf(pos.immutable())).toList();
+                return positions.get(this.sliderHostMimic.getRandom().nextInt(positions.size()));
             } else {
-                this.posX = vec3.x;
-                this.posY = vec3.y;
-                this.posZ = vec3.z;
-                return true;
+                Vec3 vec3 = DefaultRandomPos.getPos(this.sliderHostMimic, 4, 2);
+                if (vec3 == null || (this.sliderHostMimic.getDungeon() != null && !this.sliderHostMimic.getDungeon().roomBounds().contains(vec3))) {
+                    return null;
+                }
+                return vec3;
             }
         }
 
@@ -590,27 +707,25 @@ public class SliderHostMimic extends PathfinderMob implements AetherBossMob<Slid
         public boolean canContinueToUse() {
             return !this.sliderHostMimic.getBoundingBox().contains(new Vec3(this.posX, this.posY, this.posZ))
                     && this.sliderHostMimic.isAwake()
-                    && this.sliderHostMimic.getTarget() != null
                     && !this.sliderHostMimic.getNavigation().isDone()
-                    && !this.sliderHostMimic.getNavigation().isStuck();
+                    && !this.sliderHostMimic.getNavigation().isStuck()
+                    && this.sliderHostMimic.getTarget() != null;
         }
 
         @Override
         public void start() {
-            this.avoidEntity = this.sliderHostMimic.getLastHurtByMob();
             this.sliderHostMimic.playSound(this.sliderHostMimic.getScareSound(), 2.5F, 1.0F / (this.sliderHostMimic.getRandom().nextFloat() * 0.2F + 0.9F));
-            this.sliderHostMimic.getNavigation().moveTo(this.posX, this.posY, this.posZ, 1.5F);
+            this.sliderHostMimic.getMoveControl().setWantedPosition(this.posX, this.posY, this.posZ, 1.5);
+            this.sliderHostMimic.getNavigation().moveTo(this.posX, this.posY, this.posZ, 1.5);
         }
 
         @Override
         public void stop() {
-            this.avoidEntity = null;
             this.sliderHostMimic.getNavigation().stop();
-            this.sliderHostMimic.getEyeProjectiles().remove(0).discard();
         }
     }
 
-    public static class ShootHostEyeGoal extends Goal { //todo i think it needs to spawn more when hit and kill some old ones
+    public static class ShootHostEyeGoal extends Goal {
         private final SliderHostMimic sliderHostMimic;
         private int attackTime;
 
@@ -633,11 +748,6 @@ public class SliderHostMimic extends PathfinderMob implements AetherBossMob<Slid
         @Override
         public void start() {
             this.attackTime = 30;
-        }
-
-        @Override
-        public boolean requiresUpdateEveryTick() {
-            return true;
         }
 
         @Override
