@@ -472,7 +472,7 @@ public class LabyrinthEyeModel extends EntityModel<LabyrinthEye> {
 
 	@Override
 	public void setupAnim(LabyrinthEye eye, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
-		this.cogGroup.zRot = ageInTicks * 4000;
+		this.cogGroup.zRot = ageInTicks * 0.2F;
 		this.cog.visible = eye.getHealth() >= 212.0F; //todo static map for stage -> modelpart visibility or something. or just int->part pratically
 		this.cog2.visible = eye.getHealth() >= 174.0F;
 		this.cog3.visible = eye.getHealth() >= 117.0F;

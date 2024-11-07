@@ -28,11 +28,6 @@ import net.neoforged.neoforge.event.EventHooks;
 public class CogProjectile extends Projectile {
     public static final EntityDataAccessor<Boolean> SIZE = SynchedEntityData.defineId(CogProjectile.class, EntityDataSerializers.BOOLEAN);
 
-    private int lerpSteps;
-    private double lerpX;
-    private double lerpY;
-    private double lerpZ;
-    private Vec3 targetDeltaMovement = Vec3.ZERO;
     public double xPower;
     public double yPower;
     public double zPower;
@@ -53,9 +48,9 @@ public class CogProjectile extends Projectile {
         this.setPos(shooter.getX(), shooter.getY() + 1, shooter.getZ());
         // Randomizes motion on spawn.
         float rotation = this.random.nextFloat() * 360;
-        this.xPower = (Mth.sin(rotation) * 0.5) * 0.25;
-        this.zPower = (-Mth.cos(rotation) * 0.5) * 0.25;
-        this.yPower = (Mth.sin(this.random.nextFloat() * 360) * 0.45) * 0.25;
+        this.xPower = Mth.sin(rotation) * 0.35;
+        this.zPower = -Mth.cos(rotation) * 0.35;
+        this.yPower = Mth.sin(this.random.nextFloat() * 360) * 0.35;
         double verticalOffset = 1 - Math.abs(this.yPower);
         this.xPower *= verticalOffset;
         this.zPower *= verticalOffset;
@@ -70,30 +65,21 @@ public class CogProjectile extends Projectile {
     @Override
     public void tick() {
         super.tick();
-        if (this.level().isClientSide()) {
-            if (this.lerpSteps > 0) {
-                this.lerpPositionAndRotationStep(this.lerpSteps, this.lerpX, this.lerpY, this.lerpZ, 0.0, 0.0);
-                --this.lerpSteps;
-            } else {
-                this.reapplyPosition();
-            }
-        } else {
-            if (!this.onGround()) {
-                ++this.ticksInAir;
-            }
-            if (this.ticksInAir > this.getLifeSpan()) {
-                if (!this.level().isClientSide()) {
-                    this.discard();
-                }
-            }
-            HitResult result = ProjectileUtil.getHitResultOnMoveVector(this, this::canHitEntity);
-            boolean flag = false;
-            if (result.getType() != HitResult.Type.MISS && !flag && !EventHooks.onProjectileImpact(this, result)) {
-                this.onHit(result);
-            }
-            this.checkInsideBlocks();
-            this.tickMovement();
+        if (!this.onGround()) {
+            ++this.ticksInAir;
         }
+        if (this.ticksInAir > this.getLifeSpan()) {
+            if (!this.level().isClientSide()) {
+                this.discard();
+            }
+        }
+        HitResult result = ProjectileUtil.getHitResultOnMoveVector(this, this::canHitEntity);
+        boolean flag = false;
+        if (result.getType() != HitResult.Type.MISS && !flag && !EventHooks.onProjectileImpact(this, result)) {
+            this.onHit(result);
+        }
+        this.checkInsideBlocks();
+        this.tickMovement();
     }
 
     @Override
@@ -165,36 +151,6 @@ public class CogProjectile extends Projectile {
                 return false;
             }
         }
-    }
-
-    @Override
-    public void lerpTo(double x, double y, double z, float yRot, float xRot, int steps) {
-        this.lerpX = x;
-        this.lerpY = y;
-        this.lerpZ = z;
-        this.lerpSteps = steps + 2;
-        this.setDeltaMovement(this.targetDeltaMovement);
-    }
-
-    @Override
-    public double lerpTargetX() {
-        return this.lerpSteps > 0 ? this.lerpX : this.getX();
-    }
-
-    @Override
-    public double lerpTargetY() {
-        return this.lerpSteps > 0 ? this.lerpY : this.getY();
-    }
-
-    @Override
-    public double lerpTargetZ() {
-        return this.lerpSteps > 0 ? this.lerpZ : this.getZ();
-    }
-
-    @Override
-    public void lerpMotion(double x, double y, double z) {
-        this.targetDeltaMovement = new Vec3(x, y, z);
-        this.setDeltaMovement(this.targetDeltaMovement);
     }
 
     public boolean isLarge() {
