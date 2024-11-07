@@ -287,11 +287,11 @@ public class HostEyeProjectile extends Projectile {
     }
 
     @Override
-    public void recreateFromPacket(ClientboundAddEntityPacket pPacket) {
-        super.recreateFromPacket(pPacket);
-        double d0 = pPacket.getXa();
-        double d1 = pPacket.getYa();
-        double d2 = pPacket.getZa();
+    public void recreateFromPacket(ClientboundAddEntityPacket packet) {
+        super.recreateFromPacket(packet);
+        double d0 = packet.getXa();
+        double d1 = packet.getYa();
+        double d2 = packet.getZa();
         this.setDeltaMovement(d0, d1, d2);
     }
 }
