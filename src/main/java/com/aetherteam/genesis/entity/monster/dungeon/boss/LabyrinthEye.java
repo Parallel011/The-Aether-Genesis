@@ -126,7 +126,7 @@ public class LabyrinthEye extends PathfinderMob implements AetherBossMob<Labyrin
         super.defineSynchedData();
         this.entityData.define(DATA_AWAKE_ID, false);
         this.entityData.define(DATA_BOSS_NAME_ID, Component.literal("Labyrinth's Eye"));
-        this.entityData.define(DATA_BOSS_STAGE, 13);
+        this.entityData.define(DATA_BOSS_STAGE, 1);
     }
 
     @Override
@@ -228,7 +228,7 @@ public class LabyrinthEye extends PathfinderMob implements AetherBossMob<Labyrin
                 float dist = (float) Math.sqrt(x * x + z * z);
                 if (!this.level().isClientSide()) {
                     float distance = dist * 0.075F;
-                    cog.shoot(x, y + (dist * 0.2F), z, distance, 0.0F);
+                    cog.shoot(x, y + (dist * 0.2F), z, distance, 1.0F);
                     this.playSound(GenesisSoundEvents.ENTITY_LABYRINTH_EYE_COG_LOSS.get(), 2.0F, 1.0F);
                     this.playSound(SoundEvents.ITEM_BREAK, 0.8F, 0.8F + this.level().getRandom().nextFloat() * 0.4F);
                     this.level().addFreshEntity(cog);
