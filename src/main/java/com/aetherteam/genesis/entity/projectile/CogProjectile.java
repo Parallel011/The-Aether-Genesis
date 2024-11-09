@@ -27,7 +27,6 @@ import net.neoforged.neoforge.event.EventHooks;
 
 public class CogProjectile extends Projectile {
     public static final EntityDataAccessor<Boolean> SIZE = SynchedEntityData.defineId(CogProjectile.class, EntityDataSerializers.BOOLEAN);
-
     public double xPower;
     public double yPower;
     public double zPower;
@@ -109,7 +108,7 @@ public class CogProjectile extends Projectile {
     protected void onHitEntity(EntityHitResult result) {
         Entity entity = result.getEntity();
         if (entity instanceof LivingEntity livingEntity && livingEntity != this.getOwner()) {
-            if (livingEntity.hurt(AetherDamageTypes.indirectEntityDamageSource(this.level(), AetherDamageTypes.FLOATING_BLOCK, this, this.getOwner()), 5.0F + random.nextInt(2))) {
+            if (livingEntity.hurt(AetherDamageTypes.indirectEntityDamageSource(this.level(), AetherDamageTypes.FLOATING_BLOCK, this, this.getOwner()), 5.0F + this.random.nextInt(2))) {
                 if (this.getImpactExplosionSoundEvent() != null) {
                     this.level().playSound(null, this.getX(), this.getY(), this.getZ(), this.getImpactExplosionSoundEvent(), SoundSource.HOSTILE, 2.0F, this.random.nextFloat() - this.random.nextFloat() * 0.2F + 1.2F);
                 }
@@ -142,9 +141,9 @@ public class CogProjectile extends Projectile {
                 if (!this.level().isClientSide()) {
                     Vec3 vec3 = entity.getLookAngle();
                     this.setDeltaMovement(vec3);
-                    this.xPower = vec3.x * 0.25;
-                    this.yPower = vec3.y * 0.15;
-                    this.zPower = vec3.z * 0.25;
+                    this.xPower = vec3.x() * 0.25;
+                    this.yPower = vec3.y() * 0.15;
+                    this.zPower = vec3.z() * 0.25;
                 }
                 return true;
             } else {
@@ -181,6 +180,7 @@ public class CogProjectile extends Projectile {
         tag.putDouble("XSpeed", this.xPower);
         tag.putDouble("YSpeed", this.yPower);
         tag.putDouble("ZSpeed", this.zPower);
+        tag.putBoolean("Large", this.isLarge());
     }
 
     @Override
@@ -192,6 +192,9 @@ public class CogProjectile extends Projectile {
         this.xPower = tag.getDouble("XSpeed");
         this.yPower = tag.getDouble("YSpeed");
         this.zPower = tag.getDouble("ZSpeed");
+        if (tag.contains("Large")) {
+            this.setLarge(tag.getBoolean("Large"));
+        }
     }
 
     @Override

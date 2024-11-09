@@ -785,7 +785,7 @@ public class SliderHostMimic extends PathfinderMob implements AetherBossMob<Slid
         @Override
         public void start() {
             this.sliderHostMimic.setDeltaMovement(Vec3.ZERO);
-            this.sliderHostMimic.setPos(this.sliderHostMimic.position().x, this.sliderHostMimic.position().y, this.sliderHostMimic.position().z);
+            this.sliderHostMimic.setPos(this.sliderHostMimic.position().x(), this.sliderHostMimic.position().y(), this.sliderHostMimic.position().z());
         }
     }
 }
