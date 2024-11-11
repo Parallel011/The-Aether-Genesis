@@ -81,8 +81,8 @@ public class LabyrinthEye extends PathfinderMob implements AetherBossMob<Labyrin
     private final boolean[] stageDone = new boolean[13];
     public int chatCooldown;
 
-    public LabyrinthEye(EntityType<? extends PathfinderMob> pEntityType, Level pLevel) {
-        super(pEntityType, pLevel);
+    public LabyrinthEye(EntityType<? extends LabyrinthEye> entityType, Level level) {
+        super(entityType, level);
         this.bossFight = new ServerBossEvent(this.getBossName(), BossEvent.BossBarColor.RED, BossEvent.BossBarOverlay.PROGRESS);
         this.bossFight.setVisible(false);
         this.xpReward = XP_REWARD_BOSS;
@@ -345,8 +345,8 @@ public class LabyrinthEye extends PathfinderMob implements AetherBossMob<Labyrin
         return this.entityData.get(DATA_AWAKE_ID);
     }
 
-    public void setAwake(boolean ready) {
-        this.entityData.set(DATA_AWAKE_ID, ready);
+    public void setAwake(boolean awake) {
+        this.entityData.set(DATA_AWAKE_ID, awake);
     }
 
     @Override
@@ -423,7 +423,6 @@ public class LabyrinthEye extends PathfinderMob implements AetherBossMob<Labyrin
         this.chatCooldown = cooldown;
     }
 
-
     @Override
     public int getDeathScore() {
         return this.deathScore;
@@ -436,13 +435,13 @@ public class LabyrinthEye extends PathfinderMob implements AetherBossMob<Labyrin
     }
 
     @Override
-    protected SoundEvent getDeathSound() {
-        return GenesisSoundEvents.ENTITY_LABYRINTH_EYE_DEATH.get();
+    protected SoundEvent getAmbientSound() {
+        return GenesisSoundEvents.ENTITY_LABYRINTH_EYE_MOVE.get();
     }
 
     @Override
-    protected SoundEvent getAmbientSound() {
-        return GenesisSoundEvents.ENTITY_LABYRINTH_EYE_MOVE.get();
+    protected SoundEvent getDeathSound() {
+        return GenesisSoundEvents.ENTITY_LABYRINTH_EYE_DEATH.get();
     }
 
     @Override

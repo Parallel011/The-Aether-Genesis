@@ -483,6 +483,7 @@ public class SliderHostMimic extends PathfinderMob implements AetherBossMob<Slid
     public boolean canAttack(LivingEntity target) {
         return target.canBeSeenAsEnemy();
     }
+
     @Override
     public boolean ignoreExplosion(Explosion explosion) {
         return !this.isAwake();
@@ -494,7 +495,12 @@ public class SliderHostMimic extends PathfinderMob implements AetherBossMob<Slid
     }
 
     @Override
-    protected boolean canRide( Entity vehicle) {
+    public EntityDimensions getDimensions(Pose pose) {
+        return this.isAwake() ? super.getDimensions(pose) : EntityDimensions.fixed(2.0F, 2.0F);
+    }
+
+    @Override
+    protected boolean canRide(Entity vehicle) {
         return false;
     }
 
