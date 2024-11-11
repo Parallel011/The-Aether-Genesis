@@ -183,6 +183,9 @@ public class SentryGuardian extends PathfinderMob implements AetherBossMob<Sentr
                 if (!this.isBossFight()) {
                     this.start();
                 }
+                if (!this.level().isClientSide() && source.getEntity() instanceof LivingEntity living) {
+                    this.mostDamageTargetGoal.addAggro(living, amount); // AI goal for being hurt.
+                }
                 return true;
             }
         }
