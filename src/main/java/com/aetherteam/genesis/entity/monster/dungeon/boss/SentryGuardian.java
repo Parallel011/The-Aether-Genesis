@@ -571,7 +571,7 @@ public class SentryGuardian extends PathfinderMob implements AetherBossMob<Sentr
         public void tick() {
             if (this.sentryGuardian.level().getRandom().nextInt(100) == 1 && this.sentryGuardian.getTarget() != null) {
                 this.spawnDelay = 10;
-                this.sentryGuardian.setDeltaMovement(0, 0.8, 0);
+                this.sentryGuardian.setDeltaMovement(0, 0.5, 0);
             }
             this.spawnDelay--;
             if (this.spawnDelay == 0) {
