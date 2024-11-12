@@ -106,7 +106,7 @@ public class SentryGuardian extends PathfinderMob implements AetherBossMob<Sentr
     public static AttributeSupplier.Builder createMobAttributes() {
         return Monster.createMobAttributes()
                 .add(Attributes.MAX_HEALTH, 350.0)
-                .add(Attributes.MOVEMENT_SPEED, 0.5)
+                .add(Attributes.MOVEMENT_SPEED, 1.0)
                 .add(Attributes.KNOCKBACK_RESISTANCE, 0.5)
                 .add(Attributes.FOLLOW_RANGE, 64.0);
     }
