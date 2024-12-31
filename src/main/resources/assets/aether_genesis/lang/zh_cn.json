@@ -188,6 +188,7 @@
   "pack.aether_genesis.classic.description": "The classic look from Genesis of the Void",
   "pack.aether_genesis.classic.title": "Genesis of the Void Textures",
   "pack.aether_genesis.mod.description": "The Aether: Genesis Resources",
+  "subtitles.aether_genesis.block.aercloud.blue_aercloud_bounce": "境云：反冲",
   "subtitles.aether_genesis.block.portal.hum": "天境传送门：嗡鸣",
   "subtitles.aether_genesis.block.portal.trigger": "天境传送门：噪声渐响",
   "subtitles.aether_genesis.entity.carrion_sprout.death": "食腐苗：凋亡",
@@ -195,5 +196,10 @@
   "subtitles.aether_genesis.entity.tempest.ambient": "风暴怒云：嗡鸣",
   "subtitles.aether_genesis.entity.tempest.death": "风暴怒云：逸散",
   "subtitles.aether_genesis.entity.tempest.hurt": "风暴怒云：受伤",
-  "subtitles.aether_genesis.entity.tempest.shoot": "风暴怒云：轰击"
+  "subtitles.aether_genesis.entity.tempest.shoot": "风暴怒云：轰击",
+  "subtitles.aether_genesis.entity.tracking_golem.creepy_seen": "追踪魔像：定位目标",
+  "subtitles.aether_genesis.entity.tracking_golem.death": "追踪魔像：死亡",
+  "subtitles.aether_genesis.entity.tracking_golem.hit": "追踪魔像：受伤",
+  "subtitles.aether_genesis.entity.tracking_golem.say": "追踪魔像：低吼",
+  "subtitles.aether_genesis.entity.tracking_golem.seen_enemy": "追踪魔像：锁定目标"
 }
