@@ -52,7 +52,7 @@ public class GenesisEntityTypes {
     public static final  DeferredHolder<EntityType<?>, EntityType<SliderHostMimic>> SLIDER_HOST_MIMIC = ENTITY_TYPES.register("slider_host_mimic",
             () -> EntityType.Builder.of(SliderHostMimic::new, MobCategory.MONSTER).sized(2.1F, 2.5F).clientTrackingRange(10).build("slider_host_mimic"));
     public static final  DeferredHolder<EntityType<?>, EntityType<LabyrinthEye>> LABYRINTH_EYE = ENTITY_TYPES.register("labyrinth_eye",
-            () -> EntityType.Builder.of(LabyrinthEye::new, MobCategory.MONSTER).sized(2, 2).clientTrackingRange(8).build("labyrinth_eye"));
+            () -> EntityType.Builder.of(LabyrinthEye::new, MobCategory.MONSTER).sized(2.25F, 3.0F).clientTrackingRange(10).build("labyrinth_eye"));
 
     // Miscellaneous
     public static final  DeferredHolder<EntityType<?>, EntityType<BlueParachute>> BLUE_PARACHUTE = ENTITY_TYPES.register("blue_parachute",
@@ -100,7 +100,7 @@ public class GenesisEntityTypes {
     public static final  DeferredHolder<EntityType<?>, EntityType<HostEyeProjectile>> HOST_EYE = ENTITY_TYPES.register("host_eye",
             () -> EntityType.Builder.<HostEyeProjectile>of(HostEyeProjectile::new, MobCategory.MISC).sized(0.8F, 0.8F).clientTrackingRange(10).fireImmune().build("host_eye"));
     public static final  DeferredHolder<EntityType<?>, EntityType<CogProjectile>> FLYING_COG = ENTITY_TYPES.register("flying_cog",
-            () -> EntityType.Builder.<CogProjectile>of(CogProjectile::new, MobCategory.MISC).clientTrackingRange(4).updateInterval(10).sized(0.75F, 0.75F).fireImmune().build("flying_Cog"));
+            () -> EntityType.Builder.<CogProjectile>of(CogProjectile::new, MobCategory.MISC).clientTrackingRange(4).updateInterval(10).sized(1.0F, 1.0F).fireImmune().build("flying_Cog"));
 
     @SubscribeEvent
     public static void registerSpawnPlacements(SpawnPlacementRegisterEvent event) {
