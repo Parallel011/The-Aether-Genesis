@@ -108,8 +108,8 @@ public class SliderHostMimic extends PathfinderMob implements AetherBossMob<Slid
 
     @Override
     protected void registerGoals() {
-        this.goalSelector.addGoal(0, new SliderHostMimic.ShootHostEyeGoal(this));
-        this.goalSelector.addGoal(1, new SliderHostMimic.HostAvoidPlayerGoal(this));
+        this.goalSelector.addGoal(0, new SliderHostMimic.HostAvoidPlayerGoal(this));
+        this.goalSelector.addGoal(1, new SliderHostMimic.ShootHostEyeGoal(this));
         this.goalSelector.addGoal(2, new SliderHostMimic.HostRandomMovementGoal(this));
         this.goalSelector.addGoal(3, new SliderHostMimic.InactiveGoal(this));
 

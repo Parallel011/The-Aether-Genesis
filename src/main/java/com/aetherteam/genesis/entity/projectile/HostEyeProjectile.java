@@ -88,7 +88,7 @@ public class HostEyeProjectile extends Projectile {
             List<Entity> entities = this.level().getEntities(this, this.getBoundingBox());
             for (Entity target : entities) {
                 Mob owner = this.projectileOwner;
-                if (target instanceof LivingEntity living && living.hurt(this.damageSources().mobAttack(owner), 4)) {
+                if (target instanceof LivingEntity living && this.canHitEntity(living) && living.hurt(this.damageSources().mobAttack(owner), 4)) {
                     this.playSound(GenesisSoundEvents.ENTITY_HOST_EYE_COLLIDE.get(), 1.0F, (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
                     living.knockback(1.0, this.getX() - living.getX(), this.getZ() - living.getZ());
                 }
