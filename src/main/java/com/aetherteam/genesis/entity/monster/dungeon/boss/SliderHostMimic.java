@@ -186,24 +186,14 @@ public class SliderHostMimic extends PathfinderMob implements AetherBossMob<Slid
         if (this.level().getDifficulty() != Difficulty.PEACEFUL) {
             if (source.getDirectEntity() instanceof LivingEntity attacker) {
                 if (this.getDungeon() == null || this.getDungeon().isPlayerWithinRoomInterior(attacker)) { // Only allow damage within the boss room.
-                    if (attacker.getMainHandItem().canPerformAction(ToolActions.PICKAXE_DIG)
-                            || attacker.getMainHandItem().is(AetherTags.Items.SLIDER_DAMAGING_ITEMS)
-                            || attacker.getMainHandItem().isCorrectToolForDrops(AetherBlocks.CARVED_STONE.get().defaultBlockState())) { // Check for correct tool.
-                        return Optional.of(attacker);
-                    } else {
-                        return this.sendInvalidToolMessage(attacker);
-                    }
+                    return Optional.of(attacker);
                 } else {
                     this.sendTooFarMessage(attacker);
                 }
             } else if (source.getDirectEntity() instanceof Projectile projectile) {
                 if (projectile.getOwner() instanceof LivingEntity attacker) {
                     if (this.getDungeon() == null || this.getDungeon().isPlayerWithinRoomInterior(attacker)) { // Only allow damage within the boss room.
-                        if (projectile.getType().is(AetherTags.Entities.SLIDER_DAMAGING_PROJECTILES)) {
-                            return Optional.of(attacker);
-                        } else {
-                            return this.sendInvalidToolMessage(attacker);
-                        }
+                        return Optional.of(attacker);
                     } else {
                         return this.sendTooFarMessage(attacker);
                     }
@@ -763,7 +753,7 @@ public class SliderHostMimic extends PathfinderMob implements AetherBossMob<Slid
                     if (this.attackTime <= 0) {
                         HostEyeProjectile hostEyeProjectile = new HostEyeProjectile(this.sliderHostMimic.level(), this.sliderHostMimic, this.sliderHostMimic.getDirection());
                         this.sliderHostMimic.level().addFreshEntity(hostEyeProjectile);
-                        this.sliderHostMimic.playSound(this.sliderHostMimic.getShootSound(), 2.5F, 1.0F / (this.sliderHostMimic.getRandom().nextFloat() * 0.2F + 0.9F));
+                        this.sliderHostMimic.playSound(this.sliderHostMimic.getShootSound(), 1.0F, 1.0F / (this.sliderHostMimic.getRandom().nextFloat() * 0.2F + 0.9F));
                         hostEyeProjectile.setPos(this.sliderHostMimic.position().add(0.0F, (this.sliderHostMimic.getBbHeight() / 2.0F) + 0.2F, 0.0F));
                         this.sliderHostMimic.eyeProjectiles.add(hostEyeProjectile);
                         this.attackTime = 30;
