@@ -154,7 +154,7 @@ public class SentryGuardian extends PathfinderMob implements AetherBossMob<Sentr
         }
         AttributeInstance gravity = this.getAttribute(NeoForgeMod.ENTITY_GRAVITY.value());
         if (gravity != null) {
-            double fallSpeed = Math.max(gravity.getValue() * -1.25, -0.1); // Entity isn't allowed to fall too slowly from gravity.
+            double fallSpeed = Math.max(gravity.getValue() * -3.0, -0.5); // Entity isn't allowed to fall too slowly from gravity.
             if (this.getDeltaMovement().y() < fallSpeed) {
                 this.setDeltaMovement(this.getDeltaMovement().x(), fallSpeed, this.getDeltaMovement().z());
                 this.hasImpulse = true;
@@ -569,7 +569,7 @@ public class SentryGuardian extends PathfinderMob implements AetherBossMob<Sentr
 
         @Override
         public void tick() {
-            if (this.sentryGuardian.level().getRandom().nextInt(100) == 1 && this.sentryGuardian.getTarget() != null) {
+            if (this.sentryGuardian.level().getRandom().nextInt(75) == 1 && this.sentryGuardian.getTarget() != null) {
                 this.spawnDelay = 10;
                 this.sentryGuardian.setDeltaMovement(0, 0.5, 0);
             }
